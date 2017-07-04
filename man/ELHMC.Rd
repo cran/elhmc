@@ -5,44 +5,62 @@
 \title{Empirical Likelihood Hamiltonian Monte Carlo Sampling}
 \usage{
 ELHMC(initial, data, fun, dfun, prior, dprior, n.samples = 100,
-  lf.steps = 10, epsilon = 0.05, tol = 10^-5, detailed = FALSE)
+  lf.steps = 10, epsilon = 0.05, p.variance = 1, tol = 10^-5,
+  detailed = FALSE, FUN, DFUN)
 }
 \arguments{
-\item{initial}{A vector containing the initial values of the parameter}
+\item{initial}{a vector containing the initial values of the parameters}
 
-\item{data}{A matrix containing the data}
+\item{data}{a matrix containing the data}
 
-\item{fun}{The estimating function \eqn{g}. It takes in a parameter vector
+\item{fun}{the estimating function \eqn{g}. It takes in a parameter vector
 \code{params} as the first argument and a data point vector \code{x} as the
  second parameter. This function returns a vector.}
 
-\item{dfun}{A function that calculates the gradient of the estimating function
+\item{dfun}{a function that calculates the gradient of the estimating function
 \eqn{g}. It takes in a parameter vector \code{params} as the first argument
  and a data point vector \code{x} as the second argument. This function
  returns a matrix.}
 
-\item{prior}{A function with one argument \code{x} that returns
-the prior density of the parameter of interest}
+\item{prior}{a function with one argument \code{x} that returns the prior
+densities of the parameters of interest}
 
-\item{dprior}{A function with one argument \code{x} that returns
-the gradient of the density of the parameter of interest}
+\item{dprior}{a function with one argument \code{x} that returns
+the gradients of the log densities of the parameters of interest}
 
-\item{n.samples}{Number of samples to draw}
+\item{n.samples}{number of samples to draw}
 
-\item{lf.steps}{Number of leap frog steps in each Hamiltonian Monte Carlo
+\item{lf.steps}{number of leap frog steps in each Hamiltonian Monte Carlo
 update}
 
-\item{epsilon}{The leap frog step size}
+\item{epsilon}{the leap frog step size(s). This has to be a single numeric
+value or a vector of the same length as \code{initial}.}
+
+\item{p.variance}{the covariance matrix of a multivariate normal distribution
+used to generate the initial values of momentum \eqn{p} in
+Hamiltonian Monte Carlo. This can also be a single numeric value or
+a vector. See Details.}
 
 \item{tol}{EL tolerance}
 
 \item{detailed}{If this is set to \code{TRUE}, the function will return a list
 with extra information.}
+
+\item{FUN}{the same as \code{fun} but takes in a matrix \code{X} instead of
+a vector \code{x} and returns a matrix so that \code{FUN(params, X)[i, ]} is
+the same as \code{fun(params, X[i, ])}. Only one of \code{FUN} and
+\code{fun} should be provided. If both are then \code{fun} is ignored.}
+
+\item{DFUN}{the same as \code{dfun} but takes in a matrix \code{X} instead of
+a vector \code{x} and returns an array so that \code{DFUN(params, X)[, , i]}
+is the same as \code{dfun(params, X[i, ])}. Only one of \code{DFUN} and
+\code{dfun} should be provided. If both are then \code{dfun} is ignored.}
 }
 \value{
 The function returns a list with the following elements:
  \item{\code{samples}}{A matrix containing the parameter samples}
- \item{\code{acceptance.rate}}{The acceptance rate (numeric)}
+ \item{\code{acceptance.rate}}{The acceptance rate}
+ \item{\code{call}}{The matched call}
 
  If \code{detailed = TRUE}, the list contains these extra elements:
  \item{\code{proposed}}{A matrix containing the proposed values at
@@ -69,7 +87,9 @@ Suppose there are data \eqn{x = (x_1, x_2, ..., x_n)} where \eqn{x_i}
  \code{ELHMC} draws samples from a Empirical Likelihood Bayesian
  posterior distribution of the parameter \eqn{\theta}, given the data \eqn{x}
  as \code{data}, the smoothing function \eqn{g} as \code{fun},
- and the gradient of \eqn{g} as \code{dfun}.
+ and the gradient of \eqn{g} as \code{dfun} or \eqn{G(X) =
+ (g(x_1), g(x_2), ..., g(x_n))^T} as \code{FUN} and the gradient of \eqn{G}
+ as \code{DFUN}.
 }
 \examples{
 \dontrun{
@@ -84,18 +104,18 @@ df <- function(params, x) {
  rbind(c(-1, 0), c(0, -1))
 }
 ## Draw 50 samples from the Empirical Likelihood Bayesian posterior distribution
-## of the mean, using initial values (0.96, 0.97) and a standard normal distribution
-## as the prior:
+## of the mean, using initial values (0.96, 0.97) and standard normal distributions
+## as priors:
 normal_prior <- function(x) {
- exp(-0.5 * x ^ 2) / sqrt(2 * pi)
+   exp(-0.5 * x[1] ^ 2) / sqrt(2 * pi) * exp(-0.5 * x[2] ^ 2) / sqrt(2 * pi)
 }
-normal_prior_gradient <- function(x) {
- -x * exp(-0.5 * x ^ 2) / sqrt(2 * pi)
+normal_prior_log_gradient <- function(x) {
+   -x
 }
 set.seed(1234)
 mean.samples <- ELHMC(initial = c(0.96, 0.97), data = x, fun = f, dfun = df,
                      n.samples = 50, prior = normal_prior,
-                     dprior = normal_prior_gradient)
+                     dprior = normal_prior_log_gradient)
 plot(mean.samples$samples, type = "l", xlab = "", ylab = "")
 }
 }

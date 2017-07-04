@@ -17,7 +17,7 @@ CheckFuncArgs <- function(func, arguments) {
     return(FALSE)
   }
 
-  func.args = formals(func)
+  func.args <- formals(func)
 
   if(length(func.args) != length(arguments)) {
     return(FALSE)
