@@ -28,6 +28,10 @@
 #'@param tol EL tolerance
 #'@param detailed If this is set to \code{TRUE}, the function will return a list
 #'  with extra information.
+#'@param print.interval the frequency at which the results would be printed on the terminal. Defaults to 1000. 
+#'@param plot.interval the frequency at which the drawn samples would be plotted. The last half of the samples drawn are plotted after 
+#'  each plot.interval steps.  The acceptance rate is also plotted. Defaults to 0, which means no plot. 
+#'@param which.plot the vector of parameters to be plotted after each plot.interval. Defaults to NULL, which means no plot.
 #'@param FUN the same as \code{fun} but takes in a matrix \code{X} instead of
 #'  a vector \code{x} and returns a matrix so that \code{FUN(params, X)[i, ]} is
 #'  the same as \code{fun(params, X[i, ])}. Only one of \code{FUN} and
@@ -90,7 +94,7 @@
 #'                      dprior = normal_prior_log_gradient)
 #'plot(mean.samples$samples, type = "l", xlab = "", ylab = "")
 #'}
-#'@references Chaudhuri, S., Mondal, D. and Yin, T. (2015)
+#'@references Chaudhuri, S., Mondal, D. and Yin, T. (2017)
 #'  Hamiltonian Monte Carlo sampling in Bayesian empirical likelihood
 #'  computation.
 #'  \emph{Journal of the Royal Statistical Society: Series B}.
@@ -105,7 +109,7 @@
 ELHMC <- function(initial, data, fun, dfun, prior, dprior,
                   n.samples = 100, lf.steps = 10, epsilon = 0.05,
                   p.variance = 1, tol = 10^-5,
-                  detailed = FALSE, FUN, DFUN) {
+                  detailed = FALSE, print.interval=1000, plot.interval=0, which.plot=NULL, FUN, DFUN) {
   if(!(is.vector(initial) && is.numeric(initial))) {
     stop("initial must be a number or a numeric vector")
   }
@@ -201,6 +205,8 @@ ELHMC <- function(initial, data, fun, dfun, prior, dprior,
   
   cl <- match.call()
 
+  
+  
   n.samples = floor(n.samples)
   lf.steps = floor(lf.steps)
 
@@ -220,9 +226,9 @@ ELHMC <- function(initial, data, fun, dfun, prior, dprior,
 
   current.value <- initial
   
-  progress.bar <- utils::txtProgressBar(min = 1, max = n.samples, initial = 1,
-                                        style = 3)
-  on.exit(close(progress.bar))
+  #progress.bar <- utils::txtProgressBar(min = 1, max = n.samples, initial = 1,
+  #                                      style = 3)
+  #on.exit(close(progress.bar))
   
   for(i in 2:n.samples) {
     next.sample <- HMC(current.value, U = ELU, epsilon = epsilon,
@@ -244,16 +250,53 @@ ELHMC <- function(initial, data, fun, dfun, prior, dprior,
       trajectory.p[[i - 1]] <- next.sample$trajectory$trajectory.p
     }
     
-    utils::setTxtProgressBar(progress.bar, i)
+    #utils::setTxtProgressBar(progress.bar, i)
+    
+    #######ADD Plotter and Writer here ########
+    if(print.interval > 0 && i%%print.interval==0){
+       samplePrint <- paste(sprintf("%.4f", round(samples[i,], 4)), collapse=" ")
+       cat("\n",sprintf("iter %d parameter %s; Acceptance rate : %.4f", i, samplePrint,sum(acceptance[1:(i-1)]) / (i - 1)))  
+    }
+    
+    accRt=cumsum(acceptance[1:(i-1)])/seq(1,(i-1),1)
+    
+    #####Plotter Added by Sanjay#######
+    #print(which.plot)
+    
+    if(is.null(which.plot)==FALSE){
+       #if(which.plot=="ALL"){which.plot=seq(1,length(initial),1)}
+       lenPlt=length(which.plot)
+       op=par(mfrow=c(2,(lenPlt+1)))
+    
+       if(plot.interval>0 && i%%plot.interval==0 && lenPlt>0 && i>2){
+           for(j in 1:lenPlt){
+           plot(samples[(floor(i/2):i),which.plot[j]],type='l',main=" ",ylab=bquote(.(which.plot[j])))
+         }
+       
+        #plot(res[1:plotL,2],type='l',main="LLR",ylab="")
+        plot(accRt[floor(i/2):(i-1)],type='l',main="acc",ylab="")
+
+        for(j in 1:lenPlt){
+        hist(samples[(floor(i/2):i),which.plot[j]],prob=T,xlab=bquote(.(which.plot[j])),main=" ")
+        }
+      
+        #plot(res[1:plotL,ncol(res)],type='l',main="acc",ylab="")
+       }
+       par(op)
+       }
   }
 
   acceptance.rate <- sum(acceptance) / (n.samples - 1)
+
+  
 
   if(!detailed) {
     return(list(samples = samples, acceptance.rate = acceptance.rate,
                 call = cl))
   }
+  
 
+  
   trajectory <- list(trajectory.q = trajectory.q,
                      trajectory.p = trajectory.p)
   results <- list(samples = samples,

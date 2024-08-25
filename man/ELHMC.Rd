@@ -4,9 +4,25 @@
 \alias{ELHMC}
 \title{Empirical Likelihood Hamiltonian Monte Carlo Sampling}
 \usage{
-ELHMC(initial, data, fun, dfun, prior, dprior, n.samples = 100,
-  lf.steps = 10, epsilon = 0.05, p.variance = 1, tol = 10^-5,
-  detailed = FALSE, FUN, DFUN)
+ELHMC(
+  initial,
+  data,
+  fun,
+  dfun,
+  prior,
+  dprior,
+  n.samples = 100,
+  lf.steps = 10,
+  epsilon = 0.05,
+  p.variance = 1,
+  tol = 10^-5,
+  detailed = FALSE,
+  print.interval = 1000,
+  plot.interval = 0,
+  which.plot = NULL,
+  FUN,
+  DFUN
+)
 }
 \arguments{
 \item{initial}{a vector containing the initial values of the parameters}
@@ -45,6 +61,13 @@ a vector. See Details.}
 
 \item{detailed}{If this is set to \code{TRUE}, the function will return a list
 with extra information.}
+
+\item{print.interval}{the frequency at which the results would be printed on the terminal. Defaults to 1000.}
+
+\item{plot.interval}{the frequency at which the drawn samples would be plotted. The last half of the samples drawn are plotted after 
+each plot.interval steps.  The acceptance rate is also plotted. Defaults to 0, which means no plot.}
+
+\item{which.plot}{the vector of parameters to be plotted after each plot.interval. Defaults to NULL, which means no plot.}
 
 \item{FUN}{the same as \code{fun} but takes in a matrix \code{X} instead of
 a vector \code{x} and returns a matrix so that \code{FUN(params, X)[i, ]} is
@@ -120,7 +143,7 @@ plot(mean.samples$samples, type = "l", xlab = "", ylab = "")
 }
 }
 \references{
-Chaudhuri, S., Mondal, D. and Yin, T. (2015)
+Chaudhuri, S., Mondal, D. and Yin, T. (2017)
  Hamiltonian Monte Carlo sampling in Bayesian empirical likelihood
  computation.
  \emph{Journal of the Royal Statistical Society: Series B}.
@@ -130,4 +153,3 @@ Chaudhuri, S., Mondal, D. and Yin, T. (2015)
  (eds S. Brooks, A.Gelman, G. L.Jones and X.-L. Meng), pp. 113-162.
  New York: Taylor and Francis.
 }
-

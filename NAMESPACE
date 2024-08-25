@@ -5,3 +5,5 @@ importFrom(MASS,mvrnorm)
 importFrom(plyr,aaply)
 importFrom(stats,rnorm)
 importFrom(stats,runif)
+importFrom("graphics","hist","par")
+
