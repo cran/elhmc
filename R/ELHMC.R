@@ -12,8 +12,8 @@
 #'\eqn{g}. It takes in a parameter vector \code{params} as the first argument
 #'  and a data point vector \code{x} as the second argument. This function
 #'  returns a matrix.
-#'@param prior a function with one argument \code{x} that returns the prior
-#'  densities of the parameters of interest
+#'@param prior a function with one argument \code{x} that returns the log joint prior
+#'  density of the parameters of interest
 #'@param dprior a function with one argument \code{x} that returns
 #'  the gradients of the log densities of the parameters of interest
 #'@param n.samples number of samples to draw
@@ -68,7 +68,7 @@
 #'    \code{trajectory.p}. These are lists of matrices contraining position and
 #'    momentum values along trajectory in each Hamiltonian Monte Carlo update.}
 #'@examples
-#'\dontrun{
+#'\donttest{
 #'## Suppose there are four data points (1, 1), (1, -1), (-1, -1), (-1, 1)
 #'x = rbind(c(1, 1), c(1, -1), c(-1, -1), c(-1, 1))
 #'## If the parameter of interest is the mean, the smoothing function and
@@ -83,7 +83,7 @@
 #'## of the mean, using initial values (0.96, 0.97) and standard normal distributions
 #'## as priors:
 #'normal_prior <- function(x) {
-#'    exp(-0.5 * x[1] ^ 2) / sqrt(2 * pi) * exp(-0.5 * x[2] ^ 2) / sqrt(2 * pi)
+#'    -0.5 * (x[1] ^ 2 + x[2] ^ 2) -log(2 * pi)
 #'}
 #'normal_prior_log_gradient <- function(x) {
 #'    -x

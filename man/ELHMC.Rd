@@ -38,8 +38,8 @@ ELHMC(
  and a data point vector \code{x} as the second argument. This function
  returns a matrix.}
 
-\item{prior}{a function with one argument \code{x} that returns the prior
-densities of the parameters of interest}
+\item{prior}{a function with one argument \code{x} that returns the log joint prior
+density of the parameters of interest}
 
 \item{dprior}{a function with one argument \code{x} that returns
 the gradients of the log densities of the parameters of interest}
@@ -115,7 +115,7 @@ Suppose there are data \eqn{x = (x_1, x_2, ..., x_n)} where \eqn{x_i}
  as \code{DFUN}.
 }
 \examples{
-\dontrun{
+\donttest{
 ## Suppose there are four data points (1, 1), (1, -1), (-1, -1), (-1, 1)
 x = rbind(c(1, 1), c(1, -1), c(-1, -1), c(-1, 1))
 ## If the parameter of interest is the mean, the smoothing function and
@@ -130,7 +130,7 @@ df <- function(params, x) {
 ## of the mean, using initial values (0.96, 0.97) and standard normal distributions
 ## as priors:
 normal_prior <- function(x) {
-   exp(-0.5 * x[1] ^ 2) / sqrt(2 * pi) * exp(-0.5 * x[2] ^ 2) / sqrt(2 * pi)
+   -0.5 * (x[1] ^ 2 + x[2] ^ 2) -log(2 * pi)
 }
 normal_prior_log_gradient <- function(x) {
    -x

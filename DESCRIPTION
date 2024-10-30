@@ -2,8 +2,8 @@ Package: elhmc
 Type: Package
 Title: Sampling from a Empirical Likelihood Bayesian Posterior of
         Parameters Using Hamiltonian Monte Carlo
-Version: 1.2.0
-Date: 2024-08-20
+Version: 1.2.1
+Date: 2024-10-29
 Authors@R: c(person(given = c("Dang", "Trung"),
                       family = "Kien",
                       role = "aut",
@@ -22,10 +22,10 @@ Imports: emplik, plyr, stats, MASS, graphics
 License: GPL-2
 RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2024-08-25 09:11:29 UTC; sanjay
+Packaged: 2024-10-29 23:33:00 UTC; sanjay
 Author: Dang Trung Kien [aut],
   Sanjay Chaudhuri [aut, cre],
   Neo Han Wei, [aut]
 Maintainer: Sanjay Chaudhuri <schaudhuri2@unl.edu>
 Repository: CRAN
-Date/Publication: 2024-08-25 20:00:02 UTC
+Date/Publication: 2024-10-30 00:40:02 UTC
